@@ -1,8 +1,76 @@
-# Flash Sale System
+# High-Throughput Flash Sale System
 
-A production-quality, concurrency-safe flash sale system built as a monorepo. The system handles hundreds of simultaneous purchase attempts with guaranteed correctness — no overselling, no double-purchasing — using Redis Lua scripts for atomic operations and PostgreSQL for durable persistence.
 
 ---
+
+## Getting Started
+
+### Prerequisites
+
+- Docker + Docker Compose
+- Node.js 18+
+- [pnpm](https://pnpm.io/installation) — the repo pins `pnpm@10.30.0` in the root `package.json`. With Corepack enabled (`corepack enable`), `pnpm install` from the repo root uses that version.
+
+### Running locally
+
+1. **Start infrastructure**
+
+```bash
+docker-compose up -d
+docker-compose ps
+```
+
+2. **Install dependencies** (repository root)
+
+```bash
+pnpm install
+```
+
+3. **Configure the backend**
+
+```bash
+cp packages/backend/.env.example packages/backend/.env
+```
+
+Edit `packages/backend/.env` and set your sale window and stock, for example:
+
+```env
+SALE_START=2026-03-18T14:00:00.000Z
+SALE_END=2026-03-18T15:00:00.000Z
+SALE_STOCK=100
+```
+
+4. **Seed the database**
+
+```bash
+pnpm seed
+```
+
+This ensures `sales` and `purchases` tables exist, inserts a sale from your env vars, truncates existing rows, and initializes the Redis stock counter.
+
+5. **Start the app**
+
+```bash
+pnpm dev
+```
+
+- API: http://localhost:3000
+- Web UI: http://localhost:5173 (Vite proxies `/api` to the backend)
+
+To run only one process: `pnpm dev:api` (backend) or `pnpm dev:web` (frontend).
+
+### Root scripts
+
+| Command | Purpose |
+|--------|---------|
+| `pnpm dev` | API and web together |
+| `pnpm dev:api` / `pnpm dev:web` | Backend or frontend only |
+| `pnpm build` | Build backend and frontend |
+| `pnpm test` | Backend Jest suite |
+| `pnpm seed` | Seed DB and Redis (see step 4) |
+| `pnpm migrate` | Run DB migrations only (backend) |
+| `pnpm reset` | Truncate purchases and reset Redis counters (backend) |
+
 
 ## System Architecture
 
@@ -60,84 +128,6 @@ The Lua script is executed atomically — Redis processes
 it as a single indivisible operation — so exactly 100
 succeed regardless of concurrency.
 ```
-
----
-
-## Setup Instructions
-
-### Prerequisites
-
-- Docker + Docker Compose
-- Node.js 18+
-- npm 8+ (or Yarn 1.x)
-
-### 1. Start infrastructure
-
-```bash
-docker-compose up -d
-```
-
-This starts:
-- PostgreSQL 15 on `localhost:5432` (db: `flashsale`, user: `postgres`, pw: `postgres`)
-- Redis 7 on `localhost:6379`
-
-Wait for both services to report healthy:
-
-```bash
-docker-compose ps
-```
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure the backend
-
-```bash
-cp packages/backend/.env.example packages/backend/.env
-```
-
-Edit `packages/backend/.env` to set your desired sale window:
-
-```env
-SALE_START=2026-03-18T14:00:00.000Z
-SALE_END=2026-03-18T15:00:00.000Z
-SALE_STOCK=100
-```
-
-### 4. Seed the database
-
-```bash
-npm run seed
-```
-
-This will:
-1. Run database migrations (create `sales` and `purchases` tables)
-2. Insert a sale record using your env vars
-3. Clear and initialize the Redis stock counter
-
-### 5. Run the backend
-
-```bash
-npm run dev --workspace=packages/backend
-# Backend available at http://localhost:3000
-```
-
-### 6. Run the frontend
-
-```bash
-npm run dev --workspace=packages/frontend
-# Frontend available at http://localhost:5173
-```
-
-Or run both simultaneously:
-
-```bash
-npm run dev
-```
-
 ---
 
 ## API Reference
@@ -168,9 +158,7 @@ curl -X POST http://localhost:3000/api/sale/purchase \
 Unit and integration tests use mocked Redis and PostgreSQL — no infrastructure required.
 
 ```bash
-npm run test
-# or
-npm run test --workspace=packages/backend
+pnpm test
 ```
 
 The test suite covers:
@@ -188,29 +176,15 @@ The stress test fires 500 concurrent purchase requests against a running backend
 
 ### Steps
 
-1. Start infrastructure and backend (see Setup above).
+1. Start infrastructure (`docker-compose up -d`) and the API: `pnpm dev:api` (see [Run locally](#run-locally)).
 
-2. Seed with `SALE_STOCK=100` and a sale window that covers your test time:
+2. In `packages/backend/.env`, set `SALE_STOCK=100` and a sale window that includes the current time (for example a wide `SALE_START` / `SALE_END` range), then run `pnpm seed`.
 
-```bash
-SALE_START=2026-01-01T00:00:00Z \
-SALE_END=2099-12-31T23:59:59Z \
-SALE_STOCK=100 \
-npx ts-node packages/backend/src/db/seed.ts
-```
-
-3. Start the backend:
+3. Run the stress test:
 
 ```bash
-npm run dev --workspace=packages/backend
-```
-
-4. Run the stress test:
-
-```bash
-npm run stress --workspace=packages/backend
-# or directly:
-npx ts-node packages/backend/stress/stress.ts
+pnpm reset
+pnpm stress
 ```
 
 ### Expected output
@@ -289,7 +263,7 @@ Distributed locks (e.g., Redlock) introduce retry complexity, lock timeouts, and
 ```
 flash-sale-system/
 ├── docker-compose.yml          # PostgreSQL + Redis services
-├── package.json                # npm workspaces root
+├── package.json                # pnpm workspace root
 ├── README.md
 └── packages/
     ├── backend/                # Express + TypeScript API

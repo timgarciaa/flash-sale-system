@@ -1,9 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchStatus, type SaleStatus } from "./api/saleApi";
+import { ProductGallery } from "./components/ProductGallery";
 import { SaleStatus as SaleStatusComponent } from "./components/SaleStatus";
 import { PurchaseForm } from "./components/PurchaseForm";
 import { Toaster } from "@/components/ui/sonner";
 import macbookpro from "./assets/macbookpro.png";
+import macbookpro2 from "./assets/macbookpro2.png";
+import macbookpro3 from "./assets/macbookpro3.png";
+import macbookpro4 from "./assets/macbookpro4.png";
+
+const productImages = [macbookpro, macbookpro2, macbookpro3, macbookpro4];
 
 function App() {
   const [status, setStatus] = useState<SaleStatus | null>(null);
@@ -103,34 +109,10 @@ function App() {
         )}
 
         <div className="bg-white rounded shadow-sm flex flex-wrap">
-          <div className="flex-[0_0_45%] min-w-75 p-6 border-r border-[#f0f0f0] box-border">
-            <div className="border border-[#e0e0e0] rounded overflow-hidden mb-3 aspect-square flex items-center justify-center bg-[#fafafa]">
-              <img
-                src={macbookpro}
-                alt="MacBook Pro 14-inch"
-                className="w-full h-full object-contain"
-              />
-            </div>
-
-            <div className="flex gap-2">
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className={
-                    i === 0
-                      ? "flex-1 border-2 border-orange rounded overflow-hidden aspect-square cursor-pointer bg-[#fafafa] flex items-center justify-center"
-                      : "flex-1 border border-[#e0e0e0] rounded overflow-hidden aspect-square cursor-pointer bg-[#fafafa] flex items-center justify-center"
-                  }
-                >
-                  <img
-                    src={macbookpro}
-                    alt={`Thumbnail ${i + 1}`}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <ProductGallery
+            images={productImages}
+            mainImageAlt="MacBook Pro 14-inch"
+          />
 
           <div className="flex-1 min-w-75 p-6 box-border">
             <h1 className="text-xl font-semibold leading-snug mb-2.5 text-[#222]">
