@@ -1,6 +1,5 @@
 # High-Throughput Flash Sale System
 
-
 ---
 
 ## Getting Started
@@ -61,16 +60,16 @@ To run only one process: `pnpm dev:api` (backend) or `pnpm dev:web` (frontend).
 
 ### Root scripts
 
-| Command | Purpose |
-|--------|---------|
-| `pnpm dev` | API and web together |
-| `pnpm dev:api` / `pnpm dev:web` | Backend or frontend only |
-| `pnpm build` | Build backend and frontend |
-| `pnpm test` | Backend Jest suite |
-| `pnpm seed` | Seed DB and Redis (see step 4) |
-| `pnpm migrate` | Run DB migrations only (backend) |
-| `pnpm reset` | Truncate purchases and reset Redis counters (backend) |
-
+| Command                         | Purpose                                               |
+| ------------------------------- | ----------------------------------------------------- |
+| `pnpm dev`                      | API and web together                                  |
+| `pnpm dev:api` / `pnpm dev:web` | Backend or frontend only                              |
+| `pnpm build`                    | Build backend and frontend                            |
+| `pnpm test`                     | Backend Jest suite                                    |
+| `pnpm seed`                     | Seed DB and Redis (see step 4)                        |
+| `pnpm migrate`                  | Run DB migrations only (backend)                      |
+| `pnpm reset`                    | Truncate purchases and reset Redis counters (backend) |
+| `pnpm stress`                   | Simulate stress test with multiple users              |
 
 ## System Architecture
 
@@ -128,16 +127,17 @@ The Lua script is executed atomically — Redis processes
 it as a single indivisible operation — so exactly 100
 succeed regardless of concurrency.
 ```
+
 ---
 
 ## API Reference
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Health check |
-| `GET` | `/api/sale/status` | Current sale status + stock |
-| `POST` | `/api/sale/purchase` | Attempt purchase `{ userId }` |
-| `GET` | `/api/sale/purchase/:userId` | Look up a user's purchase |
+| Method | Path                         | Description                   |
+| ------ | ---------------------------- | ----------------------------- |
+| `GET`  | `/health`                    | Health check                  |
+| `GET`  | `/api/sale/status`           | Current sale status + stock   |
+| `POST` | `/api/sale/purchase`         | Attempt purchase `{ userId }` |
+| `GET`  | `/api/sale/purchase/:userId` | Look up a user's purchase     |
 
 ### Example
 
@@ -237,6 +237,7 @@ The solution is a **Redis Lua script** that combines all three checks into a sin
 ```
 
 Redis guarantees that Lua scripts are executed atomically — no other command can interleave. This means:
+
 - Stock never goes below 0
 - A user can never purchase more than once via the Redis layer
 - No distributed locks or optimistic retry loops required

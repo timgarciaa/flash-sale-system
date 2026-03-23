@@ -11,7 +11,8 @@
     "test": "pnpm --filter @flash-sale/backend test",
     "seed": "pnpm --filter @flash-sale/backend seed",
     "migrate": "pnpm --filter @flash-sale/backend migrate",
-    "reset": "pnpm --filter @flash-sale/backend reset"
+    "reset": "pnpm --filter @flash-sale/backend reset",
+    "stress": "pnpm --filter @flash-sale/backend stress"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

@@ -13,6 +13,7 @@
     "seed": "ts-node src/db/seed.ts",
     "reset": "ts-node src/db/reset.ts",
     "test": "jest",
+    "test:e2e": "jest --config test/jest-e2e.json",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "stress": "ts-node stress/stress.ts"

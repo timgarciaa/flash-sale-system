@@ -1,6 +1,7 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
+  "forceExit": true,
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
