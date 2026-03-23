@@ -1,0 +1,19 @@
+{
+  "name": "flash-sale-system",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.30.0",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @flash-sale/backend dev\" \"pnpm --filter @flash-sale/frontend dev\"",
+    "dev:api": "pnpm --filter @flash-sale/backend dev",
+    "dev:web": "pnpm --filter @flash-sale/frontend dev",
+    "build": "pnpm --filter @flash-sale/backend build && pnpm --filter @flash-sale/frontend build",
+    "test": "pnpm --filter @flash-sale/backend test",
+    "seed": "pnpm --filter @flash-sale/backend seed",
+    "migrate": "pnpm --filter @flash-sale/backend migrate",
+    "reset": "pnpm --filter @flash-sale/backend reset"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
